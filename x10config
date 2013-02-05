@@ -1,0 +1,46 @@
+TTY dummy
+#TTY	/dev/ttyUSB0
+TTY_AUX  /dev/ttyUSB0  W800RF32A
+
+#Workaround for USB-Serial Adapter
+#CHECK_RI_LINE  NO
+
+
+START_ENGINE AUTO
+LOG_DIR  /var/log/heyu
+
+#Lights [A]
+ALIAS  kitchen_lights A3  PALMPAD RFFORWARD
+ALIAS  closet         A2  PALMPAD RFFORWARD
+ALIAS  bed_light      A1 PALMPAD RFFORWARD
+ALIAS  main_lights    A1-4 PALMPAD RFFORWARD
+ALIAS  doorway        A4 PALMPAD RFFORWARD
+
+#Accessories [B]
+#ALIAS  doorbell       B7
+ALIAS  ds_doorbell    B8 DS10A 0x4B
+
+#Security Devices [C]
+ALIAS ds_front_door C2 DS10A 0xF9
+ALIAS ms_closet C3 MS10A 0x01
+ALIAS ds_sliding_door C4 DS10A 0xA9
+ALIAS ds_deadbolt C5 DS10A 0x17
+
+TRANSCEIVE ALLEXCEPT [A]
+
+#Security Devices
+SCRIPT ds_front_door alert rcva :: /usr/sbin/hal/ds_front_door alert
+SCRIPT ds_front_door clear rcva :: /usr/sbin/hal/ds_front_door clear
+SCRIPT ds_deadbolt alert rcva :: /usr/sbin/hal/ds_deadbolt alert
+SCRIPT ds_deadbolt clear rcva :: /usr/sbin/hal/ds_deadbolt clear
+
+
+#Lights
+SCRIPT kitchen_lights on rcva :: /usr/local/bin/heyu on main_lights; /usr/sbin/hal/main_lights on
+SCRIPT kitchen_lights off rcva :: /usr/local/bin/heyu alloff A; /usr/sbin/hal/main_lights off
+SCRIPT bed_light on off rcva :: /usr/sbin/hal/bed_light $X10_function
+SCRIPT A2,4 on off rcva :: heyu $X10_function A$X10_Unit
+
+#Doorbell
+#SCRIPT doorbell on rcva :: /usr/bin/tweeter.py "`date +"%T"`: Someone's at the door"
+SCRIPT ds_doorbell clear rcva :: /usr/bin/tweeter.py "`date +"%T"`: Someone's at the door"

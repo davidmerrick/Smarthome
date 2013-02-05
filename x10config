@@ -1,3 +1,5 @@
+#This is my x10 config file for heyu
+
 TTY dummy
 #TTY	/dev/ttyUSB0
 TTY_AUX  /dev/ttyUSB0  W800RF32A
